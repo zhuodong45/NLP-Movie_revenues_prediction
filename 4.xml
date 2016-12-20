@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<movie>
+   <name>4</name>
+   <company>Leisure Time Features</company>
+   <genres>
+      <genre>Drama</genre>
+      <genre>Foreign</genre>
+   </genres>
+   <authors>
+      <author>Vladimir Sorokin</author>
+   </authors>
+   <directors>
+      <director>Ilya Khrjanovsky</director>
+   </directors>
+   <origins>
+      <origin>Russia</origin>
+   </origins>
+   <actors>
+      <actor>Marina Vovchenko</actor>
+      <actor>Sergei Shnurov</actor>
+      <actor>Yuri Laguta</actor>
+      <actor>Konstantin Murzenko</actor>
+   </actors>
+   <release_date>April 7, 2006</release_date>
+   <running_time>126</running_time>
+   <rating>Not</rating>
+   <reviews>
+      <review>
+         <snippet>It's not always clear exactly what's happening in this dark tale, full of barking dogs and slabs of meat. But you won't be able to take your eyes from the screen; nor will you quickly forget this fiercely original eye-popper.</snippet>
+         <url>http://www.nypost.com/movies/66650.htm</url>
+         <critic>V.A. Musetto</critic>
+      </review>
+      <review>
+         <snippet>It's another blast of vibrant, vicious, gloomy electricity from the always-surprising Russian film scene, and the beginning of an important career.</snippet>
+         <url>http://www.salon.com/ent/movies/review/2006/04/13/btm/index3.html</url>
+         <critic>Andrew O&amp;#039;Hehir</critic>
+      </review>
+      <review>
+         <snippet>But most important, for the adventurous moviegoer, it's more than apparent throughout this inventive, hypnotic and queasily funny portrayal of socioeconomic chaos that this director is a talent to watch.</snippet>
+         <url>http://www.calendarlive.com/movies/reviews/cl-et-four14jul14,0,3944847.story</url>
+         <critic>Robert Abele</critic>
+      </review>
+      <review>
+         <snippet>As opaque as it is mesmerizing, 4 demands open eyes and open minds, but neither is it as difficult as all its weighty silences, oblique detours and countless images of glistening, sweating animal flesh - Mother Russia's raw and seriously overcooked - might suggest.</snippet>
+         <url>http://movies2.nytimes.com/2006/04/07/movies/07four.html</url>
+         <critic>Manohla Dargis</critic>
+      </review>
+      <review>
+         <snippet>Puzzling, intriguing, and often compelling, apparently set in the present but magical and futuristic in tone.</snippet>
+         <url>http://onfilm.chicagoreader.com/movies/critic.html#30322</url>
+         <critic>Jonathan Rosenbaum</critic>
+      </review>
+      <review>
+         <snippet>Immense, mystical, and deranged beyond immediate comprehension, Ilya Khrzhanovsky's 4 is an apocalyptic allegory of Mother Russia and its current state of squalid exhaustion.</snippet>
+         <url>http://www.boston.com/movies/display?display=movie&amp;id=9383</url>
+         <critic>Ty Burr</critic>
+      </review>
+      <review>
+         <snippet>Its bawdy comedy, bravura sound design and uncanny atmosphere will turn on auds with a taste for deeply oddball fare and baffle others.</snippet>
+         <url>http://www.variety.com/ac2006_review/VE1117925058?nav=reviews&amp;categoryid=198</url>
+         <critic>Leslie Felperin</critic>
+      </review>
+      <review>
+         <snippet>Although Khrzhanovsky has several tricks up his sleeve, 4's most provocative quality is its ironic surplus of beauty.</snippet>
+         <url>http://www.villagevoice.com/film/0614,hoberman,72748,20.html</url>
+         <critic>J. Hoberman</critic>
+      </review>
+      <review>
+         <snippet>Looks great but has a shambolic, off-kilter feel that might not be entirely intentional, and is alternately tedious and shocking.</snippet>
+         <url>http://online.tvguide.com/movies/database/Movie-Review.asp?MI=46783</url>
+         <critic>Ken Fox</critic>
+      </review>
+      <review>
+         <snippet>In spite of a handful of striking images--4 never resolves into anything special.</snippet>
+         <url>http://www.avclub.com/content/node/47087</url>
+         <critic>Noel Murray</critic>
+      </review>
+   </reviews>
+   <US_Gross>$18,926</US_Gross>
+   <weekend_gross>$5,815</weekend_gross>
+   <number_of_screens>1</number_of_screens>
+   <summer_release>false</summer_release>
+   <christmas_release>false</christmas_release>
+   <memorial_release>false</memorial_release>
+   <independence_release>false</independence_release>
+   <labor_release>false</labor_release>
+</movie>

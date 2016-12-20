@@ -5,6 +5,7 @@ from collections import defaultdict
 import nltk
 from nltk.corpus import stopwords
 import string
+import xml.etree.cElementTree as ET
 
 # -------------------------------------------classifier for review------------------------------------------------------
 # stopwords and punctuation
@@ -17,12 +18,11 @@ POS_LABEL = 'pos'
 NEG_LABEL = 'neg'
 
 # Path to dataset
-PATH_TO_DATA = r"E:\cs585project\NLP-Movie_revenues_prediction(to do)"  # FILL IN THE ABSOLUTE PATH TO THE DATASET HERE
-TRAIN_DIR = os.path.join(PATH_TO_DATA, "(to do)")
-TEST_DIR = os.path.join(PATH_TO_DATA, "(to do)")
+PATH_TO_DATA_train = r"E:\cs585project\hw3\hw3_large_movie_review_dataset"
+TEST_DIR = r"E:\cs585project\NLP-Movie_revenues_prediction\movies-data-v1.0\metacritic+starpower+holiday+revenue+screens+reviews"
+TRAIN_DIR = os.path.join(PATH_TO_DATA_train, "train")
 
 
-# to do
 def nltk_tokenize_doc(doc):
     """
         Tokenize a document into bag-of-words tokens
@@ -36,28 +36,44 @@ def nltk_tokenize_doc(doc):
     return bow
 
 
+def nltk_tokenize_string(review):
+    """
+        Tokenize a document into bag-of-words tokens
+    """
+    bow = defaultdict(float)
+    tokens = review.split()
+    lowered_tokens = map(lambda t: t.lower(), tokens)
+    for token in lowered_tokens:
+        if token not in stop:
+            bow[token] += 1.0
+    return bow
+
+
 class NaiveBayes:
     def __init__(self):
         self.vocab = set()
-        self.class_total_doc_counts = { POS_LABEL: 0.0,
-                                        NEG_LABEL: 0.0 }
-        self.class_total_word_counts = { POS_LABEL: 0.0,
-                                         NEG_LABEL: 0.0 }
-        self.class_word_counts = { POS_LABEL: defaultdict(float),
-                                   NEG_LABEL: defaultdict(float) }
+        self.class_total_doc_counts = {POS_LABEL: 0.0,
+                                       NEG_LABEL: 0.0}
+        self.class_total_word_counts = {POS_LABEL: 0.0,
+                                        NEG_LABEL: 0.0}
+        self.class_word_counts = {POS_LABEL: defaultdict(float),
+                                  NEG_LABEL: defaultdict(float)}
+        self.weekend_gross = []
+        self.revenue = []
+        self.review_recommend = []
 
     def train_model(self, num_docs=None):
         if num_docs is not None:
             print "Limiting to only %s docs per clas" % num_docs
 
-        pos_path = os.path.join(TRAIN_DIR, POS_LABEL)  # to do
-        neg_path = os.path.join(TRAIN_DIR, NEG_LABEL)  # to do
+        pos_path = os.path.join(TRAIN_DIR, POS_LABEL)
+        neg_path = os.path.join(TRAIN_DIR, NEG_LABEL)
         print "Starting training with paths %s and %s" % (pos_path, neg_path)
-        for (p, label) in [ (pos_path, POS_LABEL), (neg_path, NEG_LABEL) ]:
+        for (p, label) in [(pos_path, POS_LABEL), (neg_path, NEG_LABEL)]:
             filenames = os.listdir(p)
             if num_docs is not None: filenames = filenames[:num_docs]
             for f in filenames:
-                with open(os.path.join(p,f),'r') as doc:
+                with open(os.path.join(p, f), 'r') as doc:
                     content = doc.read()
                     self.tokenize_and_update_model(content, label)
         self.report_statistics_after_training()
@@ -105,24 +121,35 @@ class NaiveBayes:
         else:
             return NEG_LABEL
 
-    def evaluate_classifier_accuracy(self, alpha):
-        pos_path = os.path.join(TEST_DIR, POS_LABEL)
-        neg_path = os.path.join(TEST_DIR, NEG_LABEL)
-        count = 0
-        total_doc = 0
-        for (p, label) in [(pos_path, POS_LABEL), (neg_path, NEG_LABEL)]:
-            files = os.listdir(p)
-            for file in files:
-                with open(os.path.join(p, file), 'r') as doc:
-                    content = doc.read()
-                    total_doc += 1
-                    if self.classify(nltk_tokenize_doc(content), alpha) == label:
-                        count += 1
-        return 100 * count / total_doc
+    def read_dataset(self, alpha):
+        # for (p, label) in [(pos_path, POS_LABEL), (neg_path, NEG_LABEL)]:
+        files = os.listdir(TEST_DIR)
+        i = 0
+        for file in files:
+            pos_count = 0
+            total_review = 0
+            doc = os.path.join(TEST_DIR, file)
+            root = ET.parse(doc)
+            for review in root.findall('.//snippet'):
+                total_review += 1
+                if self.classify(nltk_tokenize_string(review.text), alpha) == POS_LABEL:
+                    pos_count += 1
+            recommend = 100 * pos_count / total_review
+            self.review_recommend.append(recommend)
+            gross = root.find('.//weekend_gross')
+            self.weekend_gross.append(gross)
+            us_gross = root.find('.//US_Gross')
+            self.revenue.append(us_gross)
+        split_list = lambda lst, sz: [lst[i:i + sz] for i in range(0, len(lst), sz)]
+        self.review_recommend = split_list(self.review_recommend, 1000)
+        self.weekend_gross = split_list(self.weekend_gross, 1000)
+        self.revenue = split_list(self.revenue, 1000)
+
+
 # ----------------------------------------------------review done-------------------------------------------------------
 if __name__ == '__main__':
     nb = NaiveBayes()
     nb.train_model()
-    print "accuracy(psuedocount:1) for test case: ", nb.evaluate_classifier_accuracy(1), "%"
+    nb.read_dataset(1)
     # nb.train_model(num_docs=10)
     # produce_hw1_results()
