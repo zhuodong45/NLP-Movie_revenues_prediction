@@ -153,13 +153,12 @@ class NaiveBayes:
         self.revenue = split_list(self.revenue, 1000)
 
         # linear regression with weekend gross and revenue
-        p = np.polyfit(self.weekend_gross[0], self.revenue[0], 1)
-        print(p)
+        p = np.polyfit(self.weekend_gross[0], self.revenue[0], 1)   # calculate linear regression
         m1 = p[0]
         c1 = p[1]
-        plt.plot(self.weekend_gross[0], self.revenue[0], 'o')
-        plt.plot(self.weekend_gross[0], np.polyval(p, self.weekend_gross[0]), 'r-')
-        plt.show()
+        plt.plot(self.weekend_gross[0], self.revenue[0], 'o')   # plot data points in the graph
+        plt.plot(self.weekend_gross[0], np.polyval(p, self.weekend_gross[0]), 'r-')  # plot line in the graph
+        plt.show()  # display plot
 
         test_weekend_gross = self.weekend_gross[1]
         test_revenue = self.revenue[1]
@@ -168,20 +167,20 @@ class NaiveBayes:
         size = len(test_weekend_gross)
         success_count = 0
         for i in range(size):
-            predict = m1 * test_weekend_gross[i] + c1
-            bias = predict / test_revenue[i]
-            if 0.7 < bias < 1.3:
+            predict = m1 * test_weekend_gross[i] + c1   # predict result
+            bias = predict / test_revenue[i]    # bias with real revenue
+            if 0.7 < bias < 1.3:    # success range
                 success_count += 1
             bias_list.append(bias)
-        print(success_count/size)
+        print(success_count/size)   # success percentage
         # print(np.sort(bias_list))
 
         # linear regression with weekend gross, review and revenue
         x1 = self.review_recommend[0]
         x2 = self.weekend_gross[0]
         y = self.revenue[0]
-        x = np.transpose(np.array([x1, x2]))
-        m2, c2 = np.linalg.lstsq(x, y)[0]
+        x = np.transpose(np.array([x1, x2]))    # 2D array
+        m2, c2 = np.linalg.lstsq(x, y)[0]   # calculate linear regression with multiple variables
         plt.plot(x, y, 'o', label='Original data')
         plt.plot(x, m2 * x + c2, 'r', label='Fitted line')
         plt.legend()
