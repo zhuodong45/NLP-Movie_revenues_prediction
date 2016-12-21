@@ -74,12 +74,12 @@ class NaiveBayes:
         self.report_statistics_after_training()
 
     def report_statistics_after_training(self):
-        print "REPORTING CORPUS STATISTICS"
-        print "NUMBER OF DOCUMENTS IN POSITIVE CLASS:", self.class_total_doc_counts[POS_LABEL]
-        print "NUMBER OF DOCUMENTS IN NEGATIVE CLASS:", self.class_total_doc_counts[NEG_LABEL]
-        print "NUMBER OF TOKENS IN POSITIVE CLASS:", self.class_total_word_counts[POS_LABEL]
-        print "NUMBER OF TOKENS IN NEGATIVE CLASS:", self.class_total_word_counts[NEG_LABEL]
-        print "VOCABULARY SIZE: NUMBER OF UNIQUE WORDTYPES IN TRAINING CORPUS:", len(self.vocab)
+        print "Review classifier training data"
+        print "Number of document in positive class:", self.class_total_doc_counts[POS_LABEL]
+        print "Number of document in negative class:", self.class_total_doc_counts[NEG_LABEL]
+        print "Number of tokens in positive class:", self.class_total_word_counts[POS_LABEL]
+        print "Number of tokens in negative class:", self.class_total_word_counts[NEG_LABEL]
+        print "Vocabulary size:", len(self.vocab)
 
     # update training data information
     def tokenize_and_update_model(self, doc, label):
@@ -146,14 +146,22 @@ class NaiveBayes:
             recommend = 100 * pos_count / total_review
             self.review_recommend = np.append(self.review_recommend, [recommend])
 
+        print
+        print "First 10 recommend examples: ", self.review_recommend[:10]
+        print "First 10 revenue examples: ", self.revenue[:10]
+        print "First 10 weekend gross examples: ", self.weekend_gross[:10]
+
         # split data into linear regression training set and testing set
         split_list = lambda lst, sz: [lst[i:i + sz] for i in range(0, len(lst), sz)]
         self.review_recommend = split_list(self.review_recommend, 1000)
         self.weekend_gross = split_list(self.weekend_gross, 1000)
         self.revenue = split_list(self.revenue, 1000)
+        print "Linear regression training data size: ", len(self.revenue[0])
+        print "Linear regression testing data size: ", len(self.revenue[1])
 
         # linear regression with weekend gross and revenue
         p = np.polyfit(self.weekend_gross[0], self.revenue[0], 1)   # calculate linear regression
+        print "Linear regression coefficients and intercept: ", p
         m1 = p[0]
         c1 = p[1]
         plt.plot(self.weekend_gross[0], self.revenue[0], 'o')   # plot data points in the graph
@@ -172,7 +180,7 @@ class NaiveBayes:
             if 0.7 < bias < 1.3:    # success range
                 success_count += 1
             bias_list.append(bias)
-        print(success_count/size)   # success percentage
+        print "Success rate: ", success_count/size  # success percentage
         # print(np.sort(bias_list))
 
         # linear regression with weekend gross, review and revenue
