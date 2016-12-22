@@ -8,6 +8,7 @@ import string
 import xml.etree.cElementTree as ET
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import stats
 
 # stopwords and punctuation
 stop = set(stopwords.words()).union(set(string.punctuation))
@@ -119,10 +120,13 @@ class NaiveBayes:
 
     # read in testing data and predict revenue
     def testing_process(self, alpha):
+        total_review = 0
+        total_pos_review = 0
+        total_neg_review = 0
         files = os.listdir(TEST_DIR)
         for file in files:
             pos_count = 0
-            total_review = 0
+            doc_review = 0
             doc = os.path.join(TEST_DIR, file)
             root = ET.parse(doc)
 
@@ -140,13 +144,19 @@ class NaiveBayes:
 
             # update review recommend
             for review in root.findall('.//snippet'):
+                doc_review += 1
                 total_review += 1
                 if self.classify(nltk_tokenize_string(review.text), alpha) == POS_LABEL:
                     pos_count += 1
-            recommend = 100 * pos_count / total_review
+                    total_pos_review += 1
+                else:
+                    total_neg_review += 1
+            recommend = 100 * pos_count / doc_review
             self.review_recommend = np.append(self.review_recommend, [recommend])
 
-        print
+        print "Total review count: ", total_review
+        print "Positive review count: ", total_pos_review
+        print "negative review count: ", total_neg_review
         print "First 10 recommend examples: ", self.review_recommend[:10]
         print "First 10 revenue examples: ", self.revenue[:10]
         print "First 10 weekend gross examples: ", self.weekend_gross[:10]
@@ -161,12 +171,25 @@ class NaiveBayes:
 
         # linear regression with weekend gross and revenue
         p = np.polyfit(self.weekend_gross[0], self.revenue[0], 1)   # calculate linear regression
-        print "Linear regression coefficients and intercept: ", p
+        slope, intercept, r_value, p_value, std_err = stats.linregress(self.weekend_gross[0], self.revenue[0])
+        print "Linear regression coefficients: ", slope
+        print "Linear regression intercept: ", intercept
+        print "R-square: ", r_value**2
         m1 = p[0]
         c1 = p[1]
-        plt.plot(self.weekend_gross[0], self.revenue[0], 'o')   # plot data points in the graph
+        print "Linear regression function: ", "y =", m1, "* weekend gross +", c1
+
+        plt.ylim([0, 350000000])
+        plt.xlim([0, 80000000])
+        plt.plot(self.weekend_gross[0], self.revenue[0], 'o')   # plot training data points in the graph
         plt.plot(self.weekend_gross[0], np.polyval(p, self.weekend_gross[0]), 'r-')  # plot line in the graph
         plt.show()  # display plot
+
+        plt.ylim([0, 350000000])
+        plt.xlim([0, 80000000])
+        plt.plot(self.weekend_gross[1], self.revenue[1], 'o')  # plot test data points in the graph
+        plt.plot(self.weekend_gross[0], np.polyval(p, self.weekend_gross[0]), 'r-')  # plot line in the graph
+        plt.show()
 
         test_weekend_gross = self.weekend_gross[1]
         test_revenue = self.revenue[1]
@@ -177,11 +200,10 @@ class NaiveBayes:
         for i in range(size):
             predict = m1 * test_weekend_gross[i] + c1   # predict result
             bias = predict / test_revenue[i]    # bias with real revenue
-            if 0.7 < bias < 1.3:    # success range
+            if 0.6 < bias < 1.4:    # success range
                 success_count += 1
             bias_list.append(bias)
         print "Success rate: ", success_count/size  # success percentage
-        # print(np.sort(bias_list))
 
         # linear regression with weekend gross, review and revenue
         x1 = self.review_recommend[0]
@@ -189,6 +211,8 @@ class NaiveBayes:
         y = self.revenue[0]
         x = np.transpose(np.array([x1, x2]))    # 2D array
         m2, c2 = np.linalg.lstsq(x, y)[0]   # calculate linear regression with multiple variables
+        plt.ylim([0, 400000000])
+        plt.xlim([0, 80000000])
         plt.plot(x, y, 'o', label='Original data')
         plt.plot(x, m2 * x + c2, 'r', label='Fitted line')
         plt.legend()
@@ -199,5 +223,3 @@ if __name__ == '__main__':
     nb = NaiveBayes()
     nb.train_model()
     nb.testing_process(1)
-    # nb.train_model(num_docs=10)
-    # produce_hw1_results()
