@@ -13,13 +13,13 @@ from scipy import stats
 # stopwords and punctuation
 stop = set(stopwords.words()).union(set(string.punctuation))
 # remove too common words
-stop.update(['the', 'and', 'a', 'of', 'to', 'is', 'in', 'i', 'it', 'that'])  # to do
+stop.update(['the', 'and', 'a', 'of', 'to', 'is', 'in', 'i', 'it', 'that'])
 
 # Global class labels.
 POS_LABEL = 'pos'
 NEG_LABEL = 'neg'
 
-# Path to dataset
+# Path to dataset(hard code)
 PATH_TO_DATA_train = r"E:\cs585project\hw3\hw3_large_movie_review_dataset"
 TEST_DIR = r"E:\cs585project\NLP-Movie_revenues_prediction\movies-data-v1.0\metacritic+starpower+holiday+revenue+screens+reviews"
 TRAIN_DIR = os.path.join(PATH_TO_DATA_train, "train")
@@ -74,6 +74,7 @@ class NaiveBayes:
                     self.tokenize_and_update_model(content, label)
         self.report_statistics_after_training()
 
+    # print out info
     def report_statistics_after_training(self):
         print "Review classifier training data"
         print "Number of document in positive class:", self.class_total_doc_counts[POS_LABEL]
@@ -110,6 +111,7 @@ class NaiveBayes:
     def unnormalized_log_posterior(self, bow, label, alpha):
         return self.log_likelihood(bow, label, alpha) + self.log_prior(label)
 
+    # use posterior to classify review
     def classify(self, bow, alpha):
         pos_prob = self.unnormalized_log_posterior(bow, POS_LABEL, alpha)
         neg_prob = self.unnormalized_log_posterior(bow, NEG_LABEL, alpha)
@@ -124,36 +126,37 @@ class NaiveBayes:
         total_pos_review = 0
         total_neg_review = 0
         files = os.listdir(TEST_DIR)
-        for file in files:
+        for file in files:  # process each file
             pos_count = 0
             doc_review = 0
             doc = os.path.join(TEST_DIR, file)
             root = ET.parse(doc)
 
             # update revenue list
-            us_gross = root.find('.//US_Gross')
-            us_gross = float(us_gross.text.replace('$', '').replace(',', ''))
-            if us_gross == 0:
+            us_gross = root.find('.//US_Gross')  # read data from xml file
+            us_gross = float(us_gross.text.replace('$', '').replace(',', ''))   # cast to float
+            if us_gross == 0:   # skip exception
                 continue
             self.revenue = np.append(self.revenue, [us_gross])
 
             # update weekend gross list
-            gross = root.find('.//weekend_gross')
-            gross = float(gross.text.replace('$', '').replace(',', ''))
+            gross = root.find('.//weekend_gross')   # read data from xml file
+            gross = float(gross.text.replace('$', '').replace(',', ''))     # cast to float
             self.weekend_gross = np.append(self.weekend_gross, [gross])
 
             # update review recommend
-            for review in root.findall('.//snippet'):
+            for review in root.findall('.//snippet'):   # read review from xml file
                 doc_review += 1
                 total_review += 1
-                if self.classify(nltk_tokenize_string(review.text), alpha) == POS_LABEL:
+                if self.classify(nltk_tokenize_string(review.text), alpha) == POS_LABEL:    # use classifier determine class
                     pos_count += 1
                     total_pos_review += 1
                 else:
                     total_neg_review += 1
-            recommend = 100 * pos_count / doc_review
+            recommend = 100 * pos_count / doc_review    # calculate recommend rate
             self.review_recommend = np.append(self.review_recommend, [recommend])
 
+        # print out relative info
         print "Total review count: ", total_review
         print "Positive review count: ", total_pos_review
         print "negative review count: ", total_neg_review
@@ -163,28 +166,30 @@ class NaiveBayes:
 
         # split data into linear regression training set and testing set
         split_list = lambda lst, sz: [lst[i:i + sz] for i in range(0, len(lst), sz)]
-        self.review_recommend = split_list(self.review_recommend, 1000)
+        self.review_recommend = split_list(self.review_recommend, 1000)     # use first 1000 data as training, the rest as testing
         self.weekend_gross = split_list(self.weekend_gross, 1000)
         self.revenue = split_list(self.revenue, 1000)
+
         print "Linear regression training data size: ", len(self.revenue[0])
         print "Linear regression testing data size: ", len(self.revenue[1])
 
         # linear regression with weekend gross and revenue
         p = np.polyfit(self.weekend_gross[0], self.revenue[0], 1)   # calculate linear regression
         slope, intercept, r_value, p_value, std_err = stats.linregress(self.weekend_gross[0], self.revenue[0])
+
         print "Linear regression coefficients: ", slope
         print "Linear regression intercept: ", intercept
         print "R-square: ", r_value**2
-        m1 = p[0]
-        c1 = p[1]
-        print "Linear regression function: ", "y =", m1, "* weekend gross +", c1
+        print "Linear regression function: ", "y =", slope, "* weekend gross +", intercept
 
+        # display plot with training data
         plt.ylim([0, 350000000])
         plt.xlim([0, 80000000])
         plt.plot(self.weekend_gross[0], self.revenue[0], 'o')   # plot training data points in the graph
         plt.plot(self.weekend_gross[0], np.polyval(p, self.weekend_gross[0]), 'r-')  # plot line in the graph
         plt.show()  # display plot
 
+        #
         plt.ylim([0, 350000000])
         plt.xlim([0, 80000000])
         plt.plot(self.weekend_gross[1], self.revenue[1], 'o')  # plot test data points in the graph
@@ -195,14 +200,16 @@ class NaiveBayes:
         test_revenue = self.revenue[1]
         bias_list = []
 
+        # calculate the bias of prediction
         size = len(test_weekend_gross)
         success_count = 0
         for i in range(size):
-            predict = m1 * test_weekend_gross[i] + c1   # predict result
+            predict = slope * test_weekend_gross[i] + intercept  # predict result
             bias = predict / test_revenue[i]    # bias with real revenue
             if 0.6 < bias < 1.4:    # success range
                 success_count += 1
             bias_list.append(bias)
+
         print "Success rate: ", success_count/size  # success percentage
 
         # linear regression with weekend gross, review and revenue
